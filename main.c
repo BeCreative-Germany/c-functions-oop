@@ -171,12 +171,22 @@ fnptr_b callStatic(Sub_struct *self,String name) {
     
 }
 /*
- First test function with the standard signature for member methods without arguments
+ Constructorfunction with the standard signature for member methods without arguments
  
 */
 void Constructor(Sub_struct *self){
     
+    //Increment the id for uniqueness
+    self->super.id++;
     printf("Hey I´ḿ the Constructor! My ID is: %d\n",self->super.id);
+}
+/*
+ Deconstructor function with the standard signature for member methods without arguments
+ 
+*/
+void Deconstructor(Sub_struct *self){
+    
+    printf("Hey I´ḿ the deconstructor! My ID is: %d and my last words are BYE BYE !\n",self->super.id);
 }
  /*
  First test function with the standard signature for variable int arguments
@@ -217,20 +227,28 @@ void GoodBye(Sub_struct *self,int argsCount, int a){
  * 
  */
 int main(int argc, char** argv) {
+
     
-//Create our first function
+//Create our virtual Constructor function
 Func f1;
-f1.f = (fnptr_t)&Hello;
-f1.name = "Hello";
+f1.b = (fnptr_b)&Constructor;
+f1.name = "onInit";
+//Create our first function
+Func f2;
+f2.f = (fnptr_t)&Hello;
+f2.name = "Hello";
 
 //Create our second function
-Func f2;
-f2.f = (fnptr_t)&GoodBye;
-f2.name = "GoodBye";
-
 Func f3;
-f3.b = (fnptr_b)&Constructor;
-f3.name = "init";
+f3.f = (fnptr_t)&GoodBye;
+f3.name = "GoodBye";
+
+//Create our virtual Deconstructor function
+Func f4;
+f4.f = (fnptr_b)&Deconstructor;
+f4.name = "onDestroy";
+
+
 
 
 //Create the sub struct which contain the base and our member function
@@ -239,7 +257,7 @@ Sub_struct s = {
     .name = "Dustin",
     .callVariable = &callVariable,
     .callStatic = &callStatic,
-    .functions = { &f1, &f2, &f3 }
+    .functions = { &f1, &f2, &f3, &f4 }
 
 
 };
@@ -251,7 +269,7 @@ Sub_struct s = {
 //----------------------------------------------------------------------
 //#Method1#
 //Call method by type def and pointer declaration with just sub instance
-fnptr_b *fpsI =  s.callStatic(&s,"init");
+fnptr_b *fpsI =  s.callStatic(&s,"onInit");
 //pointer declaration
 void (*funcInit)(Sub_struct *self) = fpsI;
 //Call method
@@ -272,10 +290,23 @@ fnptr_t *fps =  s.callVariable(&s,"GoodBye");
 void (*funcS)(Sub_struct *self) = fps;
 //Call method
 funcS(&s);
+//----------------------------------------------------------------------
+//#Method4#
+//Call method by type def and pointer declaration with just sub instance
+fnptr_b *fpsD =  s.callStatic(&s,"onDestroy");
+//pointer declaration
+void (*funcDestroy)(Sub_struct *self) = fpsD;
+//Call method
+funcDestroy(&s);
+//----------------------------------------------------------------------
 
 
 
 
+
+
+
+//Some helpful Stuff for understanding
 
 //Working with the Base
 ((Base_struct*)&s)->id = 43;
@@ -284,16 +315,14 @@ funcS(&s);
 /*Base_struct *b = &s.super; 
 b->value = 43;*/
 
-
-
-printf("%s\n",s.name); //print 13
-printf("Größe des SubStruct %d\n",sizeof(Sub_struct));
+printf("%s\n",s.name); //print Dustin
+printf("Größe des SubStruct %d\n",sizeof(Sub_struct)); // 112
 
 printf("%p\n",&s);       //Points to super "base_struct"
 printf("%p\n",&s.super); //Points to super "base_struct"
 
 
-printf("%d",s.super.id);
+printf("%d",s.super.id); //43
 
 return (EXIT_SUCCESS);
 }
