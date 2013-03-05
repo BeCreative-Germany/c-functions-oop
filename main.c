@@ -141,7 +141,7 @@ fnptr_t callVariable(Sub_struct *self,String name) {
     int f = 0;
     for(f; f < sizeof(self->functions) / sizeof(Function); f++){
         
-        int nameLength = (int)((strlen(self->functions[f]->name)+1); //calculate size of the function name
+        int nameLength = (int)((strlen(self->functions[f]->name)+1)); //calculate size of the function name
         
         if(strncmp(self->functions[f]->name, name,nameLength) == 0){
             
