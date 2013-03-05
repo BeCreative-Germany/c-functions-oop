@@ -327,8 +327,6 @@ printf("%p\n",&s.super); //Points to super "base_struct"
 printf("%d",s.super.id); //43
 
 
-//connectTCP();
-
 return (EXIT_SUCCESS);
 }
 
