@@ -11,26 +11,28 @@
  * 
  */
 
+#define type typedef
+#define func void
+
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
-
-typedef struct base_struct Base_struct;
-typedef struct sub_struct Sub_struct;
-typedef struct func Func;
+type struct base_struct Base_struct;
+type struct sub_struct Sub_struct;
+type struct func_p Function;
 
 //typedef for our function pointer
-typedef void (*fnptr_t)(Sub_struct *self,int argsCount,int a, ...);
+type void (*fnptr_t)(Sub_struct *self,int argsCount,int a, ...);
 //function pointer with base signature
-typedef void (*fnptr_b)(Sub_struct *self,int argsCount);
+type void (*fnptr_b)(Sub_struct *self,int argsCount);
 
 //Typedef string
-typedef char* String;
+type char* String;
 
-//Max length for funcname
-typedef const char* FuncName;
+//type for Function name
+type const char* FuncName;
 
 //Base
 struct base_struct {
@@ -39,15 +41,16 @@ struct base_struct {
 //Sub
 struct sub_struct {
     
-    Base_struct super;
+    Base_struct super; //Type Embedding
+    
     String name;
-    fnptr_t (*callVariable)(Func *self,FuncName name);
-    fnptr_b (*callStatic)(Func *self,FuncName name);
-    Func *functions[10];
+    fnptr_t (*callVariable)(Function *self,FuncName name);
+    fnptr_b (*callStatic)(Function *self,FuncName name);
+    Function *functions[10]; //Example with place for 10 member methods
     
 };
 
-struct func {
+struct func_p {
     
     union { //For memory optimation (A function has always one signature) 
    
@@ -136,7 +139,7 @@ int* ArgumentIntFactory(int firstArg,int argsCount) {
 fnptr_t callVariable(Sub_struct *self,String name) {
     
     int f = 0;
-    for(f; f < sizeof(self->functions) / sizeof(Func); f++){
+    for(f; f < sizeof(self->functions) / sizeof(Function); f++){
         
         int nameLength = (int)((strlen(self->functions[f]->name)+1) * sizeof(char)); //calculate size of the function name
         
@@ -157,7 +160,7 @@ fnptr_t callVariable(Sub_struct *self,String name) {
 fnptr_b callStatic(Sub_struct *self,String name) {
     
     int f = 0;
-    for(f; f < sizeof(self->functions) / sizeof(Func); f++){
+    for(f; f < sizeof(self->functions) / sizeof(Function); f++){
         
         int nameLength = (int)((strlen(self->functions[f]->name)+1) * sizeof(char)); //calculate size of the function name
         
@@ -174,7 +177,7 @@ fnptr_b callStatic(Sub_struct *self,String name) {
  Constructorfunction with the standard signature for member methods without arguments
  
 */
-void Constructor(Sub_struct *self){
+func Constructor(Sub_struct *self){
     
     //Increment the id for uniqueness
     self->super.id++;
@@ -184,7 +187,7 @@ void Constructor(Sub_struct *self){
  Deconstructor function with the standard signature for member methods without arguments
  
 */
-void Deconstructor(Sub_struct *self){
+func Deconstructor(Sub_struct *self){
     
     printf("Hey I´ḿ the deconstructor! My ID is: %d and my last words are BYE BYE !\n",self->super.id);
 }
@@ -192,7 +195,7 @@ void Deconstructor(Sub_struct *self){
  First test function with the standard signature for variable int arguments
  
  */
-void Hello(Sub_struct *self,int argsCount, int a){
+func Hello(Sub_struct *self,int argsCount, int a){
     
   
     int *args =ArgumentIntFactory(a,argsCount);
@@ -218,7 +221,7 @@ void Hello(Sub_struct *self,int argsCount, int a){
  Second test function with the standard signature for variable int arguments
  
  */
-void GoodBye(Sub_struct *self,int argsCount, int a){
+func GoodBye(Sub_struct *self,int argsCount, int a){
     
     printf("Good Bye %s\n", self->name); //print Good Bye Dustin
 }
@@ -230,24 +233,23 @@ int main(int argc, char** argv) {
 
     
 //Create our virtual Constructor function
-Func f1;
+Function f1;
 f1.b = (fnptr_b)&Constructor;
 f1.name = "onInit";
 //Create our first function
-Func f2;
+Function f2;
 f2.f = (fnptr_t)&Hello;
 f2.name = "Hello";
 
 //Create our second function
-Func f3;
+Function f3;
 f3.f = (fnptr_t)&GoodBye;
 f3.name = "GoodBye";
 
 //Create our virtual Deconstructor function
-Func f4;
+Function f4;
 f4.f = (fnptr_b)&Deconstructor;
 f4.name = "onDestroy";
-
 
 
 
@@ -316,13 +318,16 @@ funcDestroy(&s);
 b->value = 43;*/
 
 printf("%s\n",s.name); //print Dustin
-printf("Größe des SubStruct %d\n",sizeof(Sub_struct)); // 112
+printf("SizeOf SubStruct %d\n",sizeof(Sub_struct)); // 112
 
 printf("%p\n",&s);       //Points to super "base_struct"
 printf("%p\n",&s.super); //Points to super "base_struct"
 
 
 printf("%d",s.super.id); //43
+
+
+//connectTCP();
 
 return (EXIT_SUCCESS);
 }
